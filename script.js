@@ -21,40 +21,70 @@ function calculateResistance() {
     const result = calculateDamageLogic(squadPower, targetDamage, actualVirus, actualRequired);
 
     // Display results
-    displayResults(result.damage, result.attackFlag);
+    displayResults(result.damageDeal, result.attackFlag);
 }
 
 function calculateDamageLogic(squadPower, targetDamage, actualVirus, actualRequired) {
     /**
-     * PLACEHOLDER FUNCTION
-     * Replace this logic with the actual game formula
+     * Last War Resistance Calculator Formula
+     * Optimized from Google Sheets
      * 
-     * Expected return format:
-     * {
-     *     damage: number,
-     *     attackFlag: 'YES' | 'NO'
-     * }
+     * Variables:
+     * - squadPower: Squad Power (C4)
+     * - targetDamage: Target Damage (C6)
+     * - actualVirus: Actual Virus Resistance (B10)
+     * - actualRequired: Actual Required (C10)
      */
 
-    // Temporary calculation (replace with actual formula)
-    const damage = targetDamage * (squadPower / 100);
-    const attackFlag = actualVirus >= actualRequired ? 'YES' : 'NO';
+    // Step 1: Calculate MISSING
+    // MISSING = IF(actualRequired - actualVirus < 0; 0; actualRequired - actualVirus)
+    const missing = Math.max(0, actualRequired - actualVirus);
+
+    // Step 2: Calculate Missing / Required
+    // Missing / Required = IF(actualRequired = 0; 0; missing / actualRequired)
+    const missingRatio = actualRequired === 0 ? 0 : missing / actualRequired;
+
+    // Step 3: Calculate Ceiling (ROUNDUP to 2 decimal places)
+    // Ceiling = ROUNDUP(missingRatio; 2)
+    const ceiling = Math.ceil(missingRatio * 100) / 100;
+
+    // Step 4: Calculate 100% - 2x
+    // 100% - 2x = 1 - (2 * ceiling)
+    const percentageDamage = 1 - (2 * ceiling);
+
+    // Step 5: Calculate Real % Damage Deal
+    // IF(percentageDamage > 0; percentageDamage; IF(0.01 + (percentageDamage / 20) < 0.001; 0.001; 0.01 + (percentageDamage / 20)))
+    let realPercentageDamage;
+    if (percentageDamage > 0) {
+        realPercentageDamage = percentageDamage;
+    } else {
+        const alternativeCalc = 0.01 + (percentageDamage / 20);
+        realPercentageDamage = Math.max(0.001, alternativeCalc);
+    }
+
+    // Step 6: Calculate Damage Deal
+    // Damage Deal = squadPower * realPercentageDamage
+    const damageDeal = Math.round(squadPower * realPercentageDamage);
+
+    // Step 7: Calculate ATTACK FLAG
+    // ATTACK FLAG = IF(damageDeal < targetDamage; "NO"; "YES!")
+    const attackFlag = damageDeal < targetDamage ? 'NO' : 'YES';
 
     return {
-        damage: Math.round(damage),
+        damageDeal: damageDeal,
         attackFlag: attackFlag
     };
 }
 
-function displayResults(damage, attackFlag) {
+function displayResults(damageDeal, attackFlag) {
     // Update result values
-    document.getElementById('damageDealtValue').textContent = damage.toLocaleString();
+    document.getElementById('damageDealtValue').textContent = damageDeal.toLocaleString();
     document.getElementById('attackFlagValue').textContent = attackFlag;
 
     // Show results section
     document.getElementById('results').classList.remove('hidden');
 
-    // Update attack flag styling
+    // Update attack flag styling based on result
     const attackResultElement = document.querySelector('.attack-result');
     if (attackFlag === 'YES') {
         attackResultElement.style.borderColor = '#00d9ff';
