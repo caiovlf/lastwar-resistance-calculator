@@ -119,19 +119,11 @@ function displayResults(damageDeal, attackFlag) {
     const attackResultElement = document.querySelector('.attack-result');
     
     if (attackFlag === 'YES') {
-        // Green styling for YES
         attackResultElement.classList.add('yes');
         attackResultElement.classList.remove('no');
-        attackResultElement.style.borderColor = '#00d946';
-        attackResultElement.style.color = '#00d946';
-        attackResultElement.style.background = 'rgba(0, 217, 70, 0.1)';
     } else {
-        // Red styling for NO
         attackResultElement.classList.add('no');
         attackResultElement.classList.remove('yes');
-        attackResultElement.style.borderColor = '#e63946';
-        attackResultElement.style.color = '#e63946';
-        attackResultElement.style.background = 'rgba(230, 57, 70, 0.1)';
     }
 
     // Scroll to results
