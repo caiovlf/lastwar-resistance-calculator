@@ -142,3 +142,79 @@ function resetCalculator() {
     // Scroll to top
     document.getElementById('calculatorForm').scrollIntoView({ behavior: 'smooth' });
 }
+
+const VISITOR_COUNTER_API = 'https://api.counterapi.dev/v1/lastwar-resistance-calculator/page-views';
+const VISITOR_COUNTRY_API = 'https://ipapi.co/json/';
+
+function getCounterValue(counterData) {
+    if (typeof counterData === 'number') {
+        return counterData;
+    }
+
+    if (!counterData || typeof counterData !== 'object') {
+        return null;
+    }
+
+    return counterData.count ?? counterData.value ?? counterData.data?.count ?? null;
+}
+
+async function updateAccessCounter() {
+    const accessCountElement = document.getElementById('accessCount');
+    if (!accessCountElement) {
+        return;
+    }
+
+    const hasCountedSession = sessionStorage.getItem('lastwarAccessCounted') === 'true';
+    const counterEndpoint = hasCountedSession ? VISITOR_COUNTER_API : `${VISITOR_COUNTER_API}/up`;
+
+    try {
+        const response = await fetch(counterEndpoint, { cache: 'no-store' });
+        if (!response.ok) {
+            throw new Error('Could not load access counter');
+        }
+
+        const counterData = await response.json();
+        const counterValue = getCounterValue(counterData);
+
+        if (counterValue === null) {
+            throw new Error('Invalid access counter response');
+        }
+
+        accessCountElement.textContent = formatNumber(counterValue.toString());
+        sessionStorage.setItem('lastwarAccessCounted', 'true');
+    } catch (error) {
+        accessCountElement.textContent = 'N/A';
+    }
+}
+
+async function updateVisitorCountry() {
+    const visitorCountryElement = document.getElementById('visitorCountry');
+    if (!visitorCountryElement) {
+        return;
+    }
+
+    try {
+        const response = await fetch(VISITOR_COUNTRY_API, { cache: 'no-store' });
+        if (!response.ok) {
+            throw new Error('Could not load visitor country');
+        }
+
+        const countryData = await response.json();
+        const country = countryData.country_name || countryData.country || countryData.country_code;
+
+        if (!country) {
+            throw new Error('Invalid visitor country response');
+        }
+
+        visitorCountryElement.textContent = country;
+    } catch (error) {
+        visitorCountryElement.textContent = 'Unknown';
+    }
+}
+
+function initializeVisitorStats() {
+    updateAccessCounter();
+    updateVisitorCountry();
+}
+
+initializeVisitorStats();
