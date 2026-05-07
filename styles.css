@@ -10,6 +10,7 @@
     --accent-gold: #d4af37;
     --accent-red: #e63946;
     --accent-cyan: #00d9ff;
+    --accent-green: #00d946;
     --accent-purple: #9d4edd;
     --text-light: #e8e8e8;
     --text-muted: #a0a0a0;
@@ -296,9 +297,23 @@ header::before {
     box-shadow: 0 0 20px rgba(230, 57, 70, 0.3);
 }
 
+.attack-result.yes {
+    background: rgba(0, 217, 70, 0.1);
+    border-color: var(--accent-green);
+    color: var(--accent-green);
+    box-shadow: 0 0 20px rgba(0, 217, 70, 0.3);
+}
+
 .attack-result:hover {
-    box-shadow: 0 0 30px rgba(230, 57, 70, 0.5);
     transform: translateY(-5px);
+}
+
+.attack-result.yes:hover {
+    box-shadow: 0 0 30px rgba(0, 217, 70, 0.5);
+}
+
+.attack-result.no:hover {
+    box-shadow: 0 0 30px rgba(230, 57, 70, 0.5);
 }
 
 .result-value {
