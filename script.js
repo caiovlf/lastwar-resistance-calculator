@@ -4,12 +4,40 @@ document.getElementById('calculatorForm').addEventListener('submit', function(e)
     calculateResistance();
 });
 
+// Format number inputs with thousand separator as user types
+const numberInputs = document.querySelectorAll('input[type="number"]');
+numberInputs.forEach(input => {
+    input.addEventListener('input', function(e) {
+        let value = this.value.replace(/,/g, '');
+        if (value) {
+            this.value = formatNumber(value);
+        }
+    });
+
+    input.addEventListener('blur', function(e) {
+        if (this.value) {
+            let value = this.value.replace(/,/g, '');
+            this.value = formatNumber(value);
+        }
+    });
+});
+
+// Format number with thousand separator
+function formatNumber(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+// Remove formatting before calculation
+function getNumericValue(formattedValue) {
+    return parseFloat(formattedValue.toString().replace(/,/g, ''));
+}
+
 function calculateResistance() {
-    // Get input values
-    const squadPower = parseFloat(document.getElementById('squadPower').value);
-    const targetDamage = parseFloat(document.getElementById('targetDamage').value);
-    const actualVirus = parseFloat(document.getElementById('actualVirus').value);
-    const actualRequired = parseFloat(document.getElementById('actualRequired').value);
+    // Get input values and remove formatting
+    const squadPower = getNumericValue(document.getElementById('squadPower').value);
+    const targetDamage = getNumericValue(document.getElementById('targetDamage').value);
+    const actualVirus = getNumericValue(document.getElementById('actualVirus').value);
+    const actualRequired = getNumericValue(document.getElementById('actualRequired').value);
 
     // Validate inputs
     if (isNaN(squadPower) || isNaN(targetDamage) || isNaN(actualVirus) || isNaN(actualRequired)) {
@@ -67,7 +95,7 @@ function calculateDamageLogic(squadPower, targetDamage, actualVirus, actualRequi
     const damageDeal = Math.round(squadPower * realPercentageDamage);
 
     // Step 7: Calculate ATTACK FLAG
-    // ATTACK FLAG = IF(damageDeal < targetDamage; "NO"; "YES!")
+    // ATTACK FLAG = IF(damageDeal < targetDamage; "NO"; "YES")
     const attackFlag = damageDeal < targetDamage ? 'NO' : 'YES';
 
     return {
@@ -77,20 +105,29 @@ function calculateDamageLogic(squadPower, targetDamage, actualVirus, actualRequi
 }
 
 function displayResults(damageDeal, attackFlag) {
-    // Update result values
-    document.getElementById('damageDealtValue').textContent = damageDeal.toLocaleString();
+    // Update damage deal value with formatting
+    document.getElementById('damageDealtValue').textContent = formatNumber(damageDeal.toString());
+
+    // Update attack flag value
     document.getElementById('attackFlagValue').textContent = attackFlag;
 
     // Show results section
     document.getElementById('results').classList.remove('hidden');
 
-    // Update attack flag styling based on result
+    // Update attack result styling based on YES or NO
     const attackResultElement = document.querySelector('.attack-result');
+    
     if (attackFlag === 'YES') {
-        attackResultElement.style.borderColor = '#00d9ff';
-        attackResultElement.style.color = '#00d9ff';
-        attackResultElement.style.background = 'rgba(0, 217, 255, 0.1)';
+        // Green styling for YES
+        attackResultElement.classList.add('yes');
+        attackResultElement.classList.remove('no');
+        attackResultElement.style.borderColor = '#00d946';
+        attackResultElement.style.color = '#00d946';
+        attackResultElement.style.background = 'rgba(0, 217, 70, 0.1)';
     } else {
+        // Red styling for NO
+        attackResultElement.classList.add('no');
+        attackResultElement.classList.remove('yes');
         attackResultElement.style.borderColor = '#e63946';
         attackResultElement.style.color = '#e63946';
         attackResultElement.style.background = 'rgba(230, 57, 70, 0.1)';
