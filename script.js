@@ -5,10 +5,11 @@ document.getElementById('calculatorForm').addEventListener('submit', function(e)
 });
 
 // Format number inputs with thousand separator as user types
-const numberInputs = document.querySelectorAll('input[type="number"]');
+const numberInputs = document.querySelectorAll('input[type="text"].number-input');
 numberInputs.forEach(input => {
     input.addEventListener('input', function(e) {
-        let value = this.value.replace(/,/g, '');
+        // Only allow numbers
+        let value = this.value.replace(/[^0-9]/g, '');
         if (value) {
             this.value = formatNumber(value);
         }
@@ -16,7 +17,7 @@ numberInputs.forEach(input => {
 
     input.addEventListener('blur', function(e) {
         if (this.value) {
-            let value = this.value.replace(/,/g, '');
+            let value = this.value.replace(/[^0-9]/g, '');
             this.value = formatNumber(value);
         }
     });
